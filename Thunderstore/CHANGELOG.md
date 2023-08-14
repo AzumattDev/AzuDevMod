@@ -1,0 +1,4 @@
+| `Version` | `Update Notes`                                                                                                                                                                |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.0.1     | - Add ability to find GameObjects that are added to ZNetScene's m_prefabs twice, which causes issues. Made the code a bit expansive should I need that later.<br/> - Clean up |
+| 1.0.0     | - Initial Release                                                                                                                                                             |

@@ -1,10 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using AzuDevMod.Util;
 using HarmonyLib;
+using UnityEngine;
 
 namespace AzuDevMod.Patches;
+
+[HarmonyPatch(typeof(List<GameObject>), nameof(List<GameObject>.Add))]
+public class CheckDuplicatePatch
+{
+    [HarmonyPriority(Priority.Last)]
+    private static void Prefix(List<GameObject> __instance, GameObject item)
+    {
+        if (DungeonDB.instance == null || ZoneSystemCheck.HasInit) return;
+        if (item == null || !__instance.Contains(item)) return;
+
+        var name = item.name;
+        var nameLower = item.name.ToLower();
+
+        var assembly = AssetLoadTracker.GetAssemblyForPrefab(nameLower);
+        var bundle = AssetLoadTracker.GetBundleForPrefab(nameLower);
+
+        var sb = new StringBuilder($"Attempting to add duplicate GameObject to a list of GameObjects: {name}. ");
+
+        if (assembly != null && !string.IsNullOrEmpty(bundle))
+        {
+            sb.Append($"The prefab is in the bundle '{bundle}' and the assembly '{assembly.GetName().Name}'. ");
+        }
+        else if (!string.IsNullOrEmpty(bundle))
+        {
+            sb.Append($"The prefab is in the bundle '{bundle}'. ");
+        }
+        else if (assembly != null)
+        {
+            sb.Append($"The prefab is in the assembly '{assembly.GetName().Name}'. ");
+        }
+        else
+        {
+            sb.Append("Couldn't find full information for the prefab's mod. ");
+        }
+
+        sb.AppendLine($"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}");
+
+        AzuDevModPlugin.AzuDevModLogger.LogError(sb.ToString());
+    }
+}
+
+[HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.Start))]
+static class ZoneSystemCheck
+{
+    internal static bool HasInit = false;
+
+    static void Postfix(ZoneSystem __instance)
+    {
+        HasInit = true; // Only needed so the above code doesn't run after the ZoneSystem has initialized, seemed
+    }
+}
 
 [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Update))]
 public class WatchForDestroyedZNetViewsInScene
@@ -67,34 +124,38 @@ public class TrackUnregisteredZNetViews
             return;
 
         var prefabName = __instance.GetPrefabName();
-        var assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
-        var bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
+        var prefabNameLower = prefabName.ToLower();
+        var assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabNameLower);
+        var bundle = AssetLoadTracker.GetBundleForPrefab(prefabNameLower);
+
+        var sb = new StringBuilder($"ZNetView for '{prefabName}' has not been registered in ZNetScene. ");
+        sb.Append("This can cause the ZNetScene.RemoveObjects error spam. ");
 
         if (assembly != null && !string.IsNullOrEmpty(bundle))
         {
-            AzuDevModPlugin.AzuDevModLogger.LogWarning($"ZNetView for '{prefabName}' has not been registered in ZNetScene. " +
-                                                       $"This can cause the ZNetScene.RemoveObjects error spam. The prefab is in the bundle " +
-                                                       $"'{bundle}' which is from the assembly '{assembly.GetName().Name}'. " +
-                                                       $"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}");
+            sb.Append($"The prefab is in the bundle '{bundle}' which is from the assembly '{assembly.GetName().Name}'. ");
         }
         else if (!string.IsNullOrEmpty(bundle))
         {
-            AzuDevModPlugin.AzuDevModLogger.LogWarning($"ZNetView for '{prefabName}' has not been registered in ZNetScene. " +
-                                                       $"This can cause the ZNetScene.RemoveObjects error spam. The prefab is in the bundle " +
-                                                       $"'{bundle}'. " +
-                                                       $"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}");
+            sb.Append($"The prefab is in the bundle '{bundle}'. ");
+        }
+        else if (assembly != null)
+        {
+            sb.Append($"The prefab is in the assembly '{assembly.GetName().Name}'. ");
         }
         else
         {
-            AzuDevModPlugin.AzuDevModLogger.LogWarning($"ZNetView for '{prefabName}' has not been registered in ZNetScene. " +
-                                                       $"Couldn't find full information for the prefab's mod. " +
-                                                       $"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}");
+            sb.Append("Couldn't find full information for the prefab's mod. ");
         }
+
+        sb.AppendLine($"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}");
+
+        AzuDevModPlugin.AzuDevModLogger.LogWarning(sb.ToString());
     }
 }
 
 [HarmonyPatch(typeof(ZNetView), nameof(ZNetView.OnDestroy))]
 public class TrackZNetViewDestruction
 {
-    private static void Postfix(ZNetView __instance) => WatchForDestroyedZNetViewsInScene.DestroyedZNetViews.Add(__instance, $"{__instance.name}\n{Environment.StackTrace}");
+    private static void Postfix(ZNetView __instance) => WatchForDestroyedZNetViewsInScene.DestroyedZNetViews.Add(__instance, $"{__instance.name}\n{Environment.StackTrace}{Environment.NewLine}");
 }
