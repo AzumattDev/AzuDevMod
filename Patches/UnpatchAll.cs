@@ -11,6 +11,7 @@ public class DumpStacktrace
 {
     private static bool Prefix()
     {
+        if(AzuDevModPlugin.LogUnpatchAll.Value == AzuDevModPlugin.Toggle.Off) return true;
         try
         {
             string stackTrace = Environment.StackTrace;

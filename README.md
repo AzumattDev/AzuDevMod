@@ -4,18 +4,20 @@
 to `ZNetScene.RemoveObjects`, `UnpatchAll`, `AssetBundle`, and `prefab` loading errors. It's not intended for general
 use. Install it primarily if you're facing challenges in these areas.
 
-
-
 **Note**: While this mod is mainly for the client side, you can install it on a server to access logs there. However,
 most issues it addresses are likely to occur on clients running the same set of mods.
 
 **Credit where credit is due**: This mod builds upon Blaxxun's DevMod(s), initially available on the OdinPlus discord.
 Her versions that probably do more than this are private so I am not sure if something better is out there.
-While Blaxxun's work primarily addressed `ZNetScene/ZNetView/GameObject` destruction and `UnpatchAll` issues, I've unified and
-enhanced its functionalities as well as made it available on TS. Now, it not only offers clearer error outputs (like specifying mod & bundle names) but
+While Blaxxun's work primarily addressed `ZNetScene/ZNetView/GameObject` destruction and `UnpatchAll` issues, I've
+unified and
+enhanced its functionalities as well as made it available on TS. Now, it not only offers clearer error outputs (like
+specifying mod & bundle names) but
 also introduces AssetBundle and prefab loading features from my side.
 
-Please note that this doesn't mask the problems or "fix" them like ZnetScene RemoveObjects SpamKiller by sbtoonz. It's meant to find the issues and have them reported. His mod is good if you wish to use the mods and the author hasn't or doesn't want to fix the issues. Or, whatever the reasons may be. I'm not here to judge.
+Please note that this doesn't mask the problems or "fix" them like ZnetScene RemoveObjects SpamKiller by sbtoonz. It's
+meant to find the issues and have them reported. His mod is good if you wish to use the mods and the author hasn't or
+doesn't want to fix the issues. Or, whatever the reasons may be. I'm not here to judge.
 
 ---
 
@@ -77,7 +79,48 @@ processes. It serves both mod developers and users:
 </details>
 
 <br>
-<br>
+
+
+<details>
+<summary><b>Configuration</b></summary>
+
+### General User Configurations
+
+- #### Log Destroyed ZNetViews
+    - **Description:** Logs destroyed ZNetViews to the console. Useful for identifying mods that have ZNetViews
+      destroyed
+      without going through the ZNetScene.
+        - Default Value: On
+
+- #### Log Unregistered ZNetViews
+
+    - **Description:** Logs unregistered ZNetViews to the console. Useful for identifying mods that have ZNetViews with
+      prefabs not registered in the ZNetScene.
+        - Default Value: On
+
+- ### Log Unpatch All
+
+    - **Description:** Logs mods that call UnpatchAll to the console. Useful for finding mods that are unpatching
+      all patches at game close causing issues with other mods.
+        - Default Value: On
+
+- ### Log Asset Bundle Issues
+
+    - **Description:** Logs asset bundle issues to the console. Useful for identifying mods that load asset bundles
+      incorrectly or attempt to retrieve prefabs from a bundle that doesn't contain them.
+        - Default Value: On
+
+### Mod Developer Configurations
+
+- #### Log Duplicate GameObject Additions
+
+    - **Description:** Logs duplicate GameObject additions to the console. Mainly intended for mod developer debugging.
+      Note
+      that this might not work if your mod is obfuscated. Use this on a clean version of your mod. Useful for finding
+      duplicate key issues for ZNetScene, such as attempting to add duplicate GameObjects to ZNetScene's prefab list.
+        - Default Value: Off
+
+</details>
 
 `Feel free to reach out to me on discord if you need manual download assistance.`
 

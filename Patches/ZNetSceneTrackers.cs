@@ -18,6 +18,7 @@ public class CheckDuplicatePatch
     [HarmonyPriority(Priority.Last)]
     private static void Prefix(List<GameObject> __instance, GameObject item)
     {
+        if (AzuDevModPlugin.LogDuplicateGameObjectAdditions.Value == AzuDevModPlugin.Toggle.Off) return;
         if (DungeonDB.instance == null || ZoneSystemCheck.HasInit) return;
         if (item == null || !__instance.Contains(item)) return;
 
@@ -70,6 +71,7 @@ public class WatchForDestroyedZNetViewsInScene
 
     private static void Postfix(ZNetScene __instance)
     {
+        if(AzuDevModPlugin.LogDestroyedZNetViews.Value == AzuDevModPlugin.Toggle.Off) return;
         List<ZDO> zdoList = new List<ZDO>();
         foreach (KeyValuePair<ZDO, ZNetView> instance in __instance.m_instances)
         {
@@ -106,6 +108,7 @@ public class TrackUnregisteredZNetViews
 {
     private static void Postfix(ZNetView __instance)
     {
+        if (AzuDevModPlugin.LogUnregisteredZNetViews.Value == AzuDevModPlugin.Toggle.Off) return;
         int? prefab = __instance.GetZDO()?.GetPrefab();
         int num;
         if (prefab.HasValue)
