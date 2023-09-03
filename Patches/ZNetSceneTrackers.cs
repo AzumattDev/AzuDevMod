@@ -94,6 +94,15 @@ public class WatchForDestroyedZNetViewsInScene
                     AzuDevModPlugin.AzuDevModLogger.LogError($"Potential for ZNetScene.RemoveObjects error spam. " +
                                                              $"ZNetView destroyed without being destroyed through the ZNetScene: " +
                                                              $"{prefabName}. Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
+                } else if (!string.IsNullOrWhiteSpace(key.GetPrefabName()))
+                {
+                    var prefabName = key.GetPrefabName();
+
+                    var assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
+                    var bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
+                    AzuDevModPlugin.AzuDevModLogger.LogError($"Potential for ZNetScene.RemoveObjects error spam. " +
+                                                             $"ZNetView destroyed without being destroyed through the ZNetScene: " +
+                                                             $"{prefabName}. Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
                 }
             }
         }

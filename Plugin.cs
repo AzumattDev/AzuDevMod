@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using AzuDevMod.Patches;
 using AzuDevMod.Util;
 using BepInEx;
 using BepInEx.Configuration;
@@ -15,12 +16,12 @@ namespace AzuDevMod
 
     {
         internal const string ModName = "AzuDevMod";
-        internal const string ModVersion = "1.0.2";
+        internal const string ModVersion = "1.0.3";
         internal const string Author = "Azumatt";
         private const string ModGUID = $"{Author}.{ModName}";
         private static string ConfigFileName = ModGUID + ".cfg";
         private static string ConfigFileFullPath = Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
-        private readonly Harmony _harmony = new(ModGUID);
+        internal static readonly Harmony _harmony = new(ModGUID);
         public static readonly ManualLogSource AzuDevModLogger = BepInEx.Logging.Logger.CreateLogSource(ModName);
 
 
@@ -63,6 +64,7 @@ namespace AzuDevMod
 
         private void Start()
         {
+           // ModDetect.DetectModsPatchingTerminal();
             AssetLoadTracker.MapPrefabsToBundles();
             AssetLoadTracker.MapBundlesToAssemblies();
         }
