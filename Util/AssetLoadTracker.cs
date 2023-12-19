@@ -14,12 +14,12 @@ public class AssetLoadTracker
 
     internal static void MapPrefabsToBundles()
     {
-        foreach (var bundle in AssetBundle.GetAllLoadedAssetBundles())
+        foreach (AssetBundle? bundle in AssetBundle.GetAllLoadedAssetBundles())
         {
-            var allAssetNames = bundle.GetAllAssetNames();
-            var prefabNames = allAssetNames.Where(name => name.EndsWith(".prefab"));
+            string[]? allAssetNames = bundle.GetAllAssetNames();
+            IEnumerable<string>? prefabNames = allAssetNames.Where(name => name.EndsWith(".prefab"));
 
-            foreach (var prefab in prefabNames)
+            foreach (string? prefab in prefabNames)
             {
                 string simpleName = System.IO.Path.GetFileNameWithoutExtension(prefab);
                 PrefabToBundleMapping[simpleName] = bundle.name;
@@ -30,16 +30,16 @@ public class AssetLoadTracker
     internal static void MapBundlesToAssemblies()
     {
         // AppDomain.CurrentDomain.GetAssemblies() didn't work here since they are dynamically loaded. This worked though.
-        var allAssemblies = Chainloader.PluginInfos.Select(keyValuePair => keyValuePair.Value.Instance.GetType().Assembly).ToList();
+        List<Assembly>? allAssemblies = Chainloader.PluginInfos.Select(keyValuePair => keyValuePair.Value.Instance.GetType().Assembly).ToList();
 
 
-        foreach (var bundleName in PrefabToBundleMapping.Values.Distinct())
+        foreach (string? bundleName in PrefabToBundleMapping.Values.Distinct())
         {
-            foreach (var assembly in allAssemblies)
+            foreach (Assembly? assembly in allAssemblies)
             {
                 try
                 {
-                    var resourceNames = assembly.GetManifestResourceNames();
+                    string[]? resourceNames = assembly.GetManifestResourceNames();
                     if (resourceNames.Any(resourceName => resourceName.EndsWith(bundleName)))
                     {
                         BundleToAssemblyMapping[bundleName] = assembly;
@@ -57,9 +57,9 @@ public class AssetLoadTracker
 
     public static Assembly? GetAssemblyForPrefab(string prefabName)
     {
-        if (PrefabToBundleMapping.TryGetValue(prefabName, out var bundleName))
+        if (PrefabToBundleMapping.TryGetValue(prefabName, out string? bundleName))
         {
-            if (BundleToAssemblyMapping.TryGetValue(bundleName, out var assembly))
+            if (BundleToAssemblyMapping.TryGetValue(bundleName, out Assembly? assembly))
             {
                 return assembly;
             }
@@ -70,6 +70,6 @@ public class AssetLoadTracker
 
     public static string GetBundleForPrefab(string prefabName)
     {
-        return PrefabToBundleMapping.TryGetValue(prefabName, out var bundleName) ? bundleName : "";
+        return PrefabToBundleMapping.TryGetValue(prefabName, out string? bundleName) ? bundleName : "";
     }
 }

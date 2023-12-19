@@ -1,8 +1,8 @@
 # AzuDevMod
 
 **Important**: This mod is specifically designed to assist with issues related
-to `ZNetScene.RemoveObjects`, `UnpatchAll`, `AssetBundle`, and `prefab` loading errors. It's not intended for general
-use. Install it primarily if you're facing challenges in these areas.
+to `ZNetScene.RemoveObjects`, `UnpatchAll`, `AssetBundle`, and `prefab` loading errors. It's not intended for casual
+play. Install it primarily if you're facing challenges in these areas (then remove after you found your issue).
 
 **Note**: While this mod is mainly for the client side, you can install it on a server to access logs there. However,
 most issues it addresses are likely to occur on clients running the same set of mods.

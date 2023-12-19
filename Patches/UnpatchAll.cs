@@ -18,7 +18,7 @@ public class DumpStacktrace
 
             List<string> modNames = ExtractModNames(stackTrace);
             if (modNames.Count <= 0) return true;
-            foreach (var modName in modNames)
+            foreach (string? modName in modNames)
             {
                 if (!string.IsNullOrEmpty(modName))
                 {
@@ -39,7 +39,7 @@ public class DumpStacktrace
 
     private static List<string> ExtractModNames(string stackTrace)
     {
-        var matches = Regex.Matches(stackTrace, @"at (?<modName>[\w\.]+)\.OnDestroy");
+        MatchCollection? matches = Regex.Matches(stackTrace, @"at (?<modName>[\w\.]+)\.OnDestroy");
 
         return (from Match match in matches where match.Success select match.Groups["modName"].Value).ToList();
     }

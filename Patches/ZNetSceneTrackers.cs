@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using AzuDevMod.Util;
 using HarmonyLib;
 using UnityEngine;
@@ -22,13 +19,13 @@ public class CheckDuplicatePatch
         if (DungeonDB.instance == null || ZoneSystemCheck.HasInit) return;
         if (item == null || !__instance.Contains(item)) return;
 
-        var name = item.name;
-        var nameLower = item.name.ToLower();
+        string name = item.name;
+        string nameLower = item.name.ToLower();
 
-        var assembly = AssetLoadTracker.GetAssemblyForPrefab(nameLower);
-        var bundle = AssetLoadTracker.GetBundleForPrefab(nameLower);
+        Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(nameLower);
+        string bundle = AssetLoadTracker.GetBundleForPrefab(nameLower);
 
-        var sb = new StringBuilder($"Attempting to add duplicate GameObject to a list of GameObjects: {name}. ");
+        StringBuilder sb = new StringBuilder($"Attempting to add duplicate GameObject to a list of GameObjects: {name}. ");
 
         if (assembly != null && !string.IsNullOrEmpty(bundle))
         {
@@ -60,7 +57,7 @@ static class ZoneSystemCheck
 
     static void Postfix(ZoneSystem __instance)
     {
-        HasInit = true; // Only needed so the above code doesn't run after the ZoneSystem has initialized, seemed
+        HasInit = true; // Only needed so the above code doesn't run after the ZoneSystem has initialized
     }
 }
 
@@ -71,7 +68,7 @@ public class WatchForDestroyedZNetViewsInScene
 
     private static void Postfix(ZNetScene __instance)
     {
-        if(AzuDevModPlugin.LogDestroyedZNetViews.Value == AzuDevModPlugin.Toggle.Off) return;
+        if (AzuDevModPlugin.LogDestroyedZNetViews.Value == AzuDevModPlugin.Toggle.Off) return;
         List<ZDO> zdoList = new List<ZDO>();
         foreach (KeyValuePair<ZDO, ZNetView> instance in __instance.m_instances)
         {
@@ -79,31 +76,40 @@ public class WatchForDestroyedZNetViewsInScene
             if (!key)
             {
                 zdoList.Add(instance.Key);
-                string str;
-
-                if (!DestroyedZNetViews.TryGetValue(key, out str)) continue;
+                string? prefabName;
+                if (!DestroyedZNetViews.TryGetValue(key, out string str)) continue;
                 // Extract the prefab name from the stack trace
-                var startIndex = str.IndexOf("ZNetScene: ", StringComparison.Ordinal) + "ZNetScene: ".Length;
-                var endIndex = str.IndexOf("(Clone)", StringComparison.Ordinal);
+                int startIndex = str.IndexOf("ZNetScene: ", StringComparison.Ordinal) + "ZNetScene: ".Length;
+                int endIndex = str.IndexOf("(Clone)", StringComparison.Ordinal);
                 if (startIndex < endIndex && startIndex != -1)
                 {
-                    var prefabName = str.Substring(startIndex, endIndex - startIndex);
+                    prefabName = str.Substring(startIndex, endIndex - startIndex);
 
-                    var assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
-                    var bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
+                    Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
+                    string bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
                     AzuDevModPlugin.AzuDevModLogger.LogError($"Potential for ZNetScene.RemoveObjects error spam. " +
                                                              $"ZNetView destroyed without being destroyed through the ZNetScene: " +
-                                                             $"{prefabName}. Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
-                } else if (!string.IsNullOrWhiteSpace(key.GetPrefabName()))
+                                                             $"{prefabName} ({key.gameObject.name}). Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
+                }
+                else if (!string.IsNullOrWhiteSpace(key.GetPrefabName()))
                 {
-                    var prefabName = key.GetPrefabName();
+                    try
+                    {
+                        prefabName = key.GetPrefabName();
+                    }
+                    catch (Exception)
+                    {
+                        prefabName = key.gameObject.name;
+                    }
 
-                    var assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
-                    var bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
+                    Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
+                    string bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
                     AzuDevModPlugin.AzuDevModLogger.LogError($"Potential for ZNetScene.RemoveObjects error spam. " +
                                                              $"ZNetView destroyed without being destroyed through the ZNetScene: " +
                                                              $"{prefabName}. Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
                 }
+
+                AzuDevModPlugin.AzuDevModLogger.LogWarning(str);
             }
         }
 
@@ -134,13 +140,21 @@ public class TrackUnregisteredZNetViews
         endLabel:
         if (num == 0)
             return;
+        string? prefabName;
+        try
+        {
+            prefabName = __instance.GetPrefabName();
+        }
+        catch (Exception)
+        {
+            prefabName = __instance.gameObject.name;
+        }
 
-        var prefabName = __instance.GetPrefabName();
-        var prefabNameLower = prefabName.ToLower();
-        var assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabNameLower);
-        var bundle = AssetLoadTracker.GetBundleForPrefab(prefabNameLower);
+        string prefabNameLower = prefabName.ToLower();
+        Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabNameLower);
+        string bundle = AssetLoadTracker.GetBundleForPrefab(prefabNameLower);
 
-        var sb = new StringBuilder($"ZNetView for '{prefabName}' has not been registered in ZNetScene. ");
+        StringBuilder sb = new StringBuilder($"ZNetView for '{prefabName}' has not been registered in ZNetScene. ");
         sb.Append("This can cause the ZNetScene.RemoveObjects error spam. ");
 
         if (assembly != null && !string.IsNullOrEmpty(bundle))
@@ -170,4 +184,18 @@ public class TrackUnregisteredZNetViews
 public class TrackZNetViewDestruction
 {
     private static void Postfix(ZNetView __instance) => WatchForDestroyedZNetViewsInScene.DestroyedZNetViews.Add(__instance, $"{__instance.name}\n{Environment.StackTrace}{Environment.NewLine}");
+}
+
+[HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.Awake))]
+static class CatchInvalidItemdrops
+{
+    [HarmonyPriority(-2147483648)]
+    private static void Postfix(ObjectDB __instance)
+    {
+        foreach (GameObject gameObject in __instance.m_items)
+        {
+            if (gameObject.GetComponent<ItemDrop>() == null)
+                AzuDevModPlugin.AzuDevModLogger.LogError($"Found null item drop component on {gameObject.name} when it shouldn't be.");
+        }
+    }
 }
