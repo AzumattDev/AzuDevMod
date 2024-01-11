@@ -16,7 +16,7 @@ namespace AzuDevMod
 
     {
         internal const string ModName = "AzuDevMod";
-        internal const string ModVersion = "1.0.4";
+        internal const string ModVersion = "1.0.5";
         internal const string Author = "Azumatt";
         private const string ModGUID = $"{Author}.{ModName}";
         private static string ConfigFileName = ModGUID + ".cfg";
@@ -40,17 +40,13 @@ namespace AzuDevMod
 
         private void Awake()
         {
-            LogDestroyedZNetViews = Config.Bind("1 - General User", "Log Destroyed ZNetViews", Toggle.On,
-                "Logs invalid ZNetView destructions to the console. Useful for finding mods that has ZNetView's destroyed without being destroyed through the ZNetScene.");
+            LogDestroyedZNetViews = Config.Bind("1 - General User", "Log Destroyed ZNetViews", Toggle.On, "Logs invalid ZNetView destructions to the console. Useful for finding mods that has ZNetView's destroyed without being destroyed through the ZNetScene.");
 
-            LogUnregisteredZNetViews = Config.Bind("1 - General User", "Log Unregistered ZNetViews", Toggle.On,
-                "Logs unregistered ZNetViews to the console. Useful for finding mods that has ZNetView's with prefabs not registered in the ZNetScene.");
+            LogUnregisteredZNetViews = Config.Bind("1 - General User", "Log Unregistered ZNetViews", Toggle.On, "Logs unregistered ZNetViews to the console. Useful for finding mods that has ZNetView's with prefabs not registered in the ZNetScene.");
 
-            LogUnpatchAll = Config.Bind("1 - General User", "Log Unpatch All", Toggle.On,
-                "Logs mods that call UnpatchAll to the console. Useful for finding mods that are unpatching all patches at game close causing issues with other mods.");
+            LogUnpatchAll = Config.Bind("1 - General User", "Log Unpatch All", Toggle.On, "Logs mods that call UnpatchAll to the console. Useful for finding mods that are unpatching all patches at game close causing issues with other mods.");
 
-            LogAssetBundleIssues = Config.Bind("1 - General User", "Log Asset Bundle Issues", Toggle.On,
-                "Logs asset bundle issues to the console. Useful for identifying mods that load asset bundles incorrectly or attempt to retrieve prefabs from a bundle that doesn't contain them...etc.");
+            LogAssetBundleIssues = Config.Bind("1 - General User", "Log Asset Bundle Issues", Toggle.On,                "Logs asset bundle issues to the console. Useful for identifying mods that load asset bundles incorrectly or attempt to retrieve prefabs from a bundle that doesn't contain them...etc.");
 
             LogDuplicateGameObjectAdditions = Config.Bind("1 - Mod Developer", "Log Duplicate GameObject Additions", Toggle.Off,
                 "Logs duplicate GameObject additions to the console. Mainly intended for mod developer debugging. Note that this might not work " +

@@ -91,7 +91,7 @@ public class WatchForDestroyedZNetViewsInScene
                                                              $"ZNetView destroyed without being destroyed through the ZNetScene: " +
                                                              $"{prefabName} ({key.gameObject.name}). Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
                 }
-                else if (!string.IsNullOrWhiteSpace(key.GetPrefabName()))
+                else
                 {
                     try
                     {
