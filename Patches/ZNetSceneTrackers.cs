@@ -25,28 +25,7 @@ public class CheckDuplicatePatch
         Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(nameLower);
         string bundle = AssetLoadTracker.GetBundleForPrefab(nameLower);
 
-        StringBuilder sb = new StringBuilder($"Attempting to add duplicate GameObject to a list of GameObjects: {name}. ");
-
-        if (assembly != null && !string.IsNullOrEmpty(bundle))
-        {
-            sb.Append($"The prefab is in the bundle '{bundle}' and the assembly '{assembly.GetName().Name}'. ");
-        }
-        else if (!string.IsNullOrEmpty(bundle))
-        {
-            sb.Append($"The prefab is in the bundle '{bundle}'. ");
-        }
-        else if (assembly != null)
-        {
-            sb.Append($"The prefab is in the assembly '{assembly.GetName().Name}'. ");
-        }
-        else
-        {
-            sb.Append("Couldn't find full information for the prefab's mod. ");
-        }
-
-        sb.AppendLine($"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}");
-
-        AzuDevModPlugin.AzuDevModLogger.LogError(sb.ToString());
+        LoggingMethods.LogWithPrefabInfo("Attempting to add duplicate GameObject to a list of GameObjects", nameLower);
     }
 }
 
@@ -78,38 +57,30 @@ public class WatchForDestroyedZNetViewsInScene
                 zdoList.Add(instance.Key);
                 string? prefabName;
                 if (!DestroyedZNetViews.TryGetValue(key, out string str)) continue;
-                // Extract the prefab name from the stack trace
-                int startIndex = str.IndexOf("ZNetScene: ", StringComparison.Ordinal) + "ZNetScene: ".Length;
-                int endIndex = str.IndexOf("(Clone)", StringComparison.Ordinal);
-                if (startIndex < endIndex && startIndex != -1)
+                try
                 {
-                    prefabName = str.Substring(startIndex, endIndex - startIndex);
-
-                    Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
-                    string bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
-                    AzuDevModPlugin.AzuDevModLogger.LogError($"Potential for ZNetScene.RemoveObjects error spam. " +
-                                                             $"ZNetView destroyed without being destroyed through the ZNetScene: " +
-                                                             $"{prefabName} ({key.gameObject.name}). Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
+                    var prefab = ZNetScene.instance.GetPrefab(instance.Key.GetPrefab());
+                    if (prefab == false || prefab is null)
+                    {
+                        prefabName = instance.Key.GetPrefab().ToString();
+                    }
+                    else
+                    {
+                        prefabName = prefab.name;
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    try
-                    {
-                        prefabName = key.GetPrefabName();
-                    }
-                    catch (Exception)
-                    {
-                        prefabName = key.gameObject.name;
-                    }
-
-                    Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabName);
-                    string bundle = AssetLoadTracker.GetBundleForPrefab(prefabName);
-                    AzuDevModPlugin.AzuDevModLogger.LogError($"Potential for ZNetScene.RemoveObjects error spam. " +
-                                                             $"ZNetView destroyed without being destroyed through the ZNetScene: " +
-                                                             $"{prefabName}. Bundle: {bundle}. Assembly: {assembly?.GetName().Name}");
+                    prefabName = "Couldn't get prefab name";
                 }
-
-                AzuDevModPlugin.AzuDevModLogger.LogWarning(str);
+                
+                string additionalInformation = string.Empty;
+                if (instance.Key != null)
+                {
+                    additionalInformation = $"ZDO: {instance.Key.m_uid} | Owner: {instance.Key.GetOwner()} | Sector: {instance.Key.GetSector()} | Position: {instance.Key.GetPosition()}{Environment.NewLine}";
+                }
+                
+                LoggingMethods.LogWithPrefabInfo("Potential for ZNetScene.RemoveObjects error spam. ZNetView destroyed without being destroyed through the ZNetScene", prefabName, $"{Environment.NewLine}{additionalInformation}");
             }
         }
 
@@ -151,32 +122,8 @@ public class TrackUnregisteredZNetViews
         }
 
         string prefabNameLower = prefabName.ToLower();
-        Assembly? assembly = AssetLoadTracker.GetAssemblyForPrefab(prefabNameLower);
-        string bundle = AssetLoadTracker.GetBundleForPrefab(prefabNameLower);
 
-        StringBuilder sb = new StringBuilder($"ZNetView for '{prefabName}' has not been registered in ZNetScene. ");
-        sb.Append("This can cause the ZNetScene.RemoveObjects error spam. ");
-
-        if (assembly != null && !string.IsNullOrEmpty(bundle))
-        {
-            sb.Append($"The prefab is in the bundle '{bundle}' which is from the assembly '{assembly.GetName().Name}'. ");
-        }
-        else if (!string.IsNullOrEmpty(bundle))
-        {
-            sb.Append($"The prefab is in the bundle '{bundle}'. ");
-        }
-        else if (assembly != null)
-        {
-            sb.Append($"The prefab is in the assembly '{assembly.GetName().Name}'. ");
-        }
-        else
-        {
-            sb.Append("Couldn't find full information for the prefab's mod. ");
-        }
-
-        sb.AppendLine($"Full Stack Trace :{Environment.NewLine}{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}");
-
-        AzuDevModPlugin.AzuDevModLogger.LogWarning(sb.ToString());
+        LoggingMethods.LogWithPrefabInfo($"ZNetView for '{prefabName}' has not been registered in ZNetScene. This can cause the ZNetScene.RemoveObjects error spam.", prefabNameLower);
     }
 }
 
