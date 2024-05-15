@@ -16,9 +16,9 @@ namespace AzuDevMod
 
     {
         internal const string ModName = "AzuDevMod";
-        internal const string ModVersion = "1.0.6";
+        internal const string ModVersion = "1.0.7";
         internal const string Author = "Azumatt";
-        private const string ModGUID = $"{Author}.{ModName}";
+        private const string ModGUID = $"zzzzzzzzzz{Author}.{ModName}";
         private static string ConfigFileName = ModGUID + ".cfg";
         private static string ConfigFileFullPath = Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
         internal static readonly Harmony _harmony = new(ModGUID);
@@ -46,7 +46,7 @@ namespace AzuDevMod
 
             LogUnpatchAll = Config.Bind("1 - General User", "Log Unpatch All", Toggle.On, "Logs mods that call UnpatchAll to the console. Useful for finding mods that are unpatching all patches at game close causing issues with other mods.");
 
-            LogAssetBundleIssues = Config.Bind("1 - General User", "Log Asset Bundle Issues", Toggle.On,                "Logs asset bundle issues to the console. Useful for identifying mods that load asset bundles incorrectly or attempt to retrieve prefabs from a bundle that doesn't contain them...etc.");
+            LogAssetBundleIssues = Config.Bind("1 - General User", "Log Asset Bundle Issues", Toggle.On, "Logs asset bundle issues to the console. Useful for identifying mods that load asset bundles incorrectly or attempt to retrieve prefabs from a bundle that doesn't contain them...etc.");
 
             LogDuplicateGameObjectAdditions = Config.Bind("1 - Mod Developer", "Log Duplicate GameObject Additions", Toggle.Off,
                 "Logs duplicate GameObject additions to the console. Mainly intended for mod developer debugging. Note that this might not work " +
@@ -60,13 +60,19 @@ namespace AzuDevMod
 
         private void Start()
         {
-           // ModDetect.DetectModsPatchingTerminal();
+            // ModDetect.DetectModsPatchingTerminal();
             AssetLoadTracker.MapPrefabsToBundles();
             AssetLoadTracker.MapBundlesToAssemblies();
         }
 
         private void OnDestroy()
         {
+            /*AzuDevModLogger.LogWarning("Detected plugins calling UnpatchSelf, this will cause longer shutdown times:");
+            foreach (string? plugin in HarmonyUnpatchSelfPatch.DetectedPlugins)
+            {
+                AzuDevModLogger.LogWarning(plugin);
+            }*/
+
             Config.Save();
         }
 
