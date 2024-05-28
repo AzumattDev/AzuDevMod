@@ -77,6 +77,9 @@
         <Reference Include="BepInEx">
             <HintPath>$(BepInExPath)\core\BepInEx.dll</HintPath>
         </Reference>
+        <Reference Include="Mono.Cecil">
+          <HintPath>$(BepInExPath)\core\Mono.Cecil.dll</HintPath>
+        </Reference>
         <Reference Include="System"/>
         <Reference Include="System.Core"/>
         <Reference Include="System.Data"/>
@@ -98,6 +101,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="MissingFieldDetector.cs" />
         <Compile Include="Patches\BundleShit.cs" />
         <Compile Include="Patches\UnpatchAll.cs" />
         <Compile Include="Patches\ZNetSceneTrackers.cs" />

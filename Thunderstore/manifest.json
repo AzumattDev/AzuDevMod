@@ -1,6 +1,6 @@
 {
   "name": "AzuDevMod",
-  "version_number": "1.0.7",
+  "version_number": "1.0.8",
   "website_url": "https://github.com/AzumattDev/AzuDevMod",
   "description": "This mod is specifically designed to assist with issues related\nto ZNetScene.RemoveObjects, UnpatchAll, AssetBundle, and prefab loading errors. It's not intended for casual play. Install it primarily if you're facing challenges in these areas.",
   "dependencies": [
