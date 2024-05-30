@@ -19,7 +19,7 @@ namespace AzuDevMod
 
     {
         internal const string ModName = "AzuDevMod";
-        internal const string ModVersion = "1.0.8";
+        internal const string ModVersion = "1.0.9";
         internal const string Author = "Azumatt";
         private const string ModGUID = $"zzzzzzzzzz{Author}.{ModName}";
         private static string ConfigFileName = ModGUID + ".cfg";
@@ -71,6 +71,7 @@ namespace AzuDevMod
             if (Version.CurrentVersion >= new GameVersion(0, 218, 16))
             {
                 fieldsToCheck.Add(new Tuple<string, string>("Player", "m_firstSpawn"));
+                fieldsToCheck.Add(new Tuple<string, string>("Player", "m_valkyrie"));
             }
 
             if (Version.CurrentVersion >= new GameVersion(0, 218, 15))
